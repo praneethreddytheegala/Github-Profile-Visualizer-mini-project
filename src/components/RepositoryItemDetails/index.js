@@ -74,7 +74,7 @@ class RepositoryItemDetails extends Component {
 
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
-    const url = `https://apis2.ccbp.in/gpv/specific-repo/${username}/${repoName}?api_key=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`
+    const url = `https://apis2.ccbp.in/gpv/specific-repo/${username}/${repoName}?api_key=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`
     const options = {
       method: 'GET',
     }
@@ -279,7 +279,7 @@ class RepositoryItemDetails extends Component {
   )
  */
   render() {
-    // const {username} = this.props
+    const {username} = this.props
     return (
       <>
         <Header />
