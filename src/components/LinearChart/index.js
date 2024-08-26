@@ -12,16 +12,16 @@ const LinearChart = props => {
       data={data}
       margin={{
         top: 5,
-        right: 100,
-        left: 0,
-        bottom: 0,
+        right: 30,
+        left: 20,
+        bottom: 5,
       }}
     >
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey="name" />
       <YAxis />
       <Tooltip />
-      <Line type="" dataKey="commits" stroke="#8884d8" activeDot={{r: 8}} />
+      <Line type="monotone" dataKey="commits" stroke="#8884d8" />
     </LineChart>
   )
 }

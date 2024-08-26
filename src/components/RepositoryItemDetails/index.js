@@ -1,29 +1,72 @@
 import {Component} from 'react'
-
 import Loader from 'react-loader-spinner'
-
 import Header from '../Header'
-
 import Languages from '../Languages'
-
 import Contributors from '../Contributors'
-
 import Piechart from '../Piechart'
-
 import './index.css'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
-  failure: 'Failure',
+  failure: 'FAILURE',
   inProgress: 'IN_PROGRESS',
 }
 
 class RepositoryItemDetails extends Component {
-  state = {repositoryItemDetailsList: {}, apiStatus: apiStatusConstants.initial}
+  state = {
+    repositoryItemDetailsList: {},
+    apiStatus: apiStatusConstants.initial,
+    isValidUser: true, // To handle the case of invalid or empty username
+  }
 
   componentDidMount() {
-    this.getGitHubUserRepositoryItemDetails()
+    const {username} = this.props
+    if (username) {
+      this.getGitHubUserRepositoryItemDetails()
+    } else {
+      this.setState({isValidUser: false})
+    }
+  }
+
+  getGitHubUserRepositoryItemDetails = async () => {
+    const {username, repoName} = this.props
+
+    this.setState({apiStatus: apiStatusConstants.inProgress})
+
+    const url = `https://apis2.ccbp.in/gpv/specific-repo/${username}/${repoName}?api_key=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`
+    const options = {
+      method: 'GET',
+    }
+
+    try {
+      const response = await fetch(url, options)
+      if (response.ok) {
+        const data = await response.json()
+        const updatedData = {
+          name: data.name,
+          description: data.description,
+          languages: data.lanuages,
+          stargazersCount: data.stargazers_count,
+          forksCount: data.forks_count,
+          commitsCount: data.network_count,
+          issuesCount: data.open_issues_count,
+          contributors: data.contributors.map(contributor =>
+            this.getContributors(contributor),
+          ),
+          owner: this.getOwner(data.owner),
+          watchersCount: data.watchers_count,
+        }
+        this.setState({
+          repositoryItemDetailsList: updatedData,
+          apiStatus: apiStatusConstants.success,
+        })
+      } else {
+        throw new Error('Failed to fetch data')
+      }
+    } catch (error) {
+      this.setState({apiStatus: apiStatusConstants.failure})
+    }
   }
 
   getContributors = contributor => ({
@@ -69,66 +112,70 @@ class RepositoryItemDetails extends Component {
     url: owner.url,
   })
 
-  getGitHubUserRepositoryItemDetails = async () => {
-    const {username, repoName} = this.props
+  onClickTryAgain = () => {
+    this.getGitHubUserRepositoryItemDetails()
+  }
 
-    this.setState({apiStatus: apiStatusConstants.inProgress})
+  renderFailureView = () => (
+    <div className="repositoryFailureContainer">
+      <img
+        src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718604995/Group_7522_f4ueqy.png"
+        alt="failure view"
+        className="error-view"
+      />
+      <p className="errorName">Something went wrong. Please try again</p>
+      <button
+        className="tryButton"
+        type="button"
+        onClick={this.onClickTryAgain}
+      >
+        Try again
+      </button>
+    </div>
+  )
 
-    const url = `https://apis2.ccbp.in/gpv/specific-repo/${username}/${repoName}?api_key=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`
-    const options = {
-      method: 'GET',
+  renderNoDataView = () => (
+    <div className="noDataFoundContainer">
+      <img
+        src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718949987/Repository-NoDataFound-2x_dzw1h2.png"
+        alt="empty repositories"
+        className="repo-no-data-img"
+      />
+      <h1 className="repo-no-data-heading">No Data Found</h1>
+      <p className="repo-no-data-desc">
+        GitHub Username is empty, please provide a valid username for
+        Repositories
+      </p>
+    </div>
+  )
+
+  renderLoaderView = () => (
+    <div className="repository-loader-container" data-testid="loader">
+      <Loader type="TailSpin" color="#3B82F6" height={50} width={50} />
+    </div>
+  )
+
+  renderGitRepositoryItemDetails = () => {
+    const {apiStatus, isValidUser} = this.state
+
+    if (!isValidUser) {
+      return this.renderNoDataView()
     }
 
-    const response = await fetch(url, options)
-    console.log(response)
-    if (response.ok === true) {
-      const data = await response.json()
-      console.log(data)
-      const updatedData = {
-        name: data.name,
-        description: data.description,
-        languages: data.lanuages,
-        stargazersCount: data.stargazers_count,
-        forksCount: data.forks_count,
-        commitsCount: data.network_count,
-        issuesCount: data.open_issues_count,
-        contributors: data.contributors.map(contributor => ({
-          avatarUrl: contributor.avatar_url,
-          contribution: contributor.contribution,
-          eventsUrl: contributor.events_url,
-          followersUrl: contributor.followers_url,
-          followingUrl: contributor.following_url,
-          gistsUrl: contributor.gists_url,
-          gravatarId: contributor.gravatar_id,
-          htmlUrl: contributor.html_url,
-          id: contributor.id,
-          login: contributor.login,
-          nodeId: contributor.node_id,
-          organizationsUrl: contributor.organizations_url,
-          receivedEventsUrl: contributor.received_events_url,
-          reposUrl: contributor.repos_url,
-          siteAdmin: contributor.site_admin,
-          starredUrl: contributor.starred_url,
-          subscriptionsUrl: contributor.subscriptions_url,
-          type: contributor.type,
-          url: contributor.url,
-        })),
-        owner: this.getOwner(data.owner),
-        watchersCount: data.watchers_count,
-      }
-      console.log(updatedData)
-      this.setState({
-        repositoryItemDetailsList: updatedData,
-        apiStatus: apiStatusConstants.success,
-      })
-    } else {
-      this.setState({apiStatus: apiStatusConstants.failure})
+    switch (apiStatus) {
+      case apiStatusConstants.success:
+        return this.renderRepositoryItemSuccessView()
+      case apiStatusConstants.failure:
+        return this.renderFailureView()
+      case apiStatusConstants.inProgress:
+        return this.renderLoaderView()
+      default:
+        return null
     }
   }
 
   renderRepositoryItemSuccessView = () => {
     const {repositoryItemDetailsList} = this.state
-    // const objectItems = repositoryItemDetailsList[0]
     const {
       name,
       description,
@@ -141,8 +188,6 @@ class RepositoryItemDetails extends Component {
       owner,
     } = repositoryItemDetailsList
     const {avatarUrl, login} = owner
-
-    const contributorLength = contributors.length
 
     return (
       <div data-testid="repoItem" className="repo-item">
@@ -192,7 +237,7 @@ class RepositoryItemDetails extends Component {
             </div>
             <div className="contributors-container">
               <h1 className="contributors-heading">Contributors :</h1>
-              <p className="contributors-desc">{contributorLength} Members</p>
+              <p className="contributors-desc">{contributors.length} Members</p>
               <div className="contributors-images-container">
                 {contributors.map(eachContributor => (
                   <Contributors
@@ -212,74 +257,7 @@ class RepositoryItemDetails extends Component {
     )
   }
 
-  onClickTryAgain = () => {
-    this.getGitHubUserRepositoryItemDetails()
-  }
-
-  renderFailureView = () => (
-    <div className="repositoryFailureContainer">
-      <img
-        src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718604995/Group_7522_f4ueqy.png"
-        alt="failure view"
-        className="error-view"
-      />
-      <p className="errorName">Something went wrong. Please try again</p>
-      <button
-        className="tryButton"
-        type="button"
-        onClick={this.onClickTryAgain}
-      >
-        Try again
-      </button>
-    </div>
-  )
-
-  renderLoaderView = () => (
-    <div className="repository-loader-container" data-testid="loader">
-      <Loader type="TailSpin" color="#3B82F6" height={50} width={50} />
-    </div>
-  )
-
-  renderGitRepositoryItemDetails = () => {
-    const {apiStatus} = this.state
-    switch (apiStatus) {
-      case apiStatusConstants.success:
-        return this.renderRepositoryItemSuccessView()
-      case apiStatusConstants.failure:
-        return this.renderFailureView()
-      case apiStatusConstants.inProgress:
-        return this.renderLoaderView()
-      default:
-        return null
-    }
-  }
-
-  /* renderNoDataFound = () => (
-    <div className="noDataFoundContainer">
-      <img
-        src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718949987/Repository-NoDataFound-2x_dzw1h2.png"
-        alt="empty repositories"
-        className="repo-no-data-img"
-      />
-      <h1 className="repo-no-data-heading">No Data Found</h1>
-      <p className="repo-no-data-desc">
-        GitHub Username is empty, please provide a valid username for
-        Repositories
-      </p>
-      <Link to="/">
-        <button
-          type="button"
-          className="goto-home-button"
-          onClick={this.onClickGotoHome}
-        >
-          Go to Home
-        </button>
-      </Link>
-    </div>
-  )
- */
   render() {
-    const {username} = this.props
     return (
       <>
         <Header />
@@ -290,4 +268,5 @@ class RepositoryItemDetails extends Component {
     )
   }
 }
+
 export default RepositoryItemDetails

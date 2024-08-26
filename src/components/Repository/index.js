@@ -63,7 +63,7 @@ class Repository extends Component {
 
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
-    const url = `https://apis2.ccbp.in/gpv/repos/${username}?api_key=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`
+    const url = `https://apis2.ccbp.in/gpv/repos/${username}?api_key=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`
     const options = {
       method: 'GET',
     }
@@ -177,7 +177,7 @@ class Repository extends Component {
               alt="no repositories"
               className="no-data-image"
             />
-            <h1 className="noDataHeading">No Repositories Found!</h1>
+            <h1 className="noDataHeading">No Repositories Found</h1>
           </div>
         ) : (
           <>

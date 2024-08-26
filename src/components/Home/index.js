@@ -1,120 +1,114 @@
 import {Component} from 'react'
-
 import Loader from 'react-loader-spinner'
-
 import {HiOutlineSearch} from 'react-icons/hi'
-
 import {RiBuildingLine} from 'react-icons/ri'
-
 import {IoLocationOutline} from 'react-icons/io5'
-
 import {IoMdLink} from 'react-icons/io'
-
 import UsernameContext from '../../context/UsernameContext'
-
 import Header from '../Header'
-
 import './index.css'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
-  failure: 'Failure',
+  failure: 'FAILURE',
   inProgress: 'IN_PROGRESS',
 }
 
 class Home extends Component {
   state = {
     profileDetails: [],
-    /* username: '', */
-    isError: false,
-    errorMsg: '',
     apiStatus: apiStatusConstants.initial,
+    errorMsg: '',
   }
 
-  componentDidMount() {
-    this.getGitHubUserProfileDetails()
-  }
-
-  getGitHubUserProfileDetails = async () => {
-    const {username} = this.props
-
+  getGitHubUserProfileDetails = async username => {
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
-    const GitHubUserProfileUrl = `https://apis2.ccbp.in/gpv/profile-details/${username}?api_key=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`
-    const options = {
-      method: 'GET',
-    }
-    const response = await fetch(GitHubUserProfileUrl, options)
+    const GitHubUserProfileUrl = `https://apis2.ccbp.in/gpv/profile-details/${username}?api_key=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`
+    const options = {method: 'GET'}
 
-    if (response.ok === true) {
-      const data = await response.json()
-      console.log(data)
-      const updatedData = {
-        avatarUrl: data.avatar_url,
-        bio: data.bio,
-        blog: data.blog,
-        company: data.company,
-        createdAt: data.created_at,
-        email: data.email,
-        eventsUrl: data.events_url,
-        followers: data.followers,
-        followersUrl: data.followers_url,
-        following: data.following,
-        followingUrl: data.following_url,
-        gistsUrl: data.gists_url,
-        gravatarId: data.gravatar_id,
-        hireable: data.hireable,
-        htmlUrl: data.html_url,
-        id: data.id,
-        location: data.location,
-        login: data.login,
-        name: data.name,
-        nodeId: data.node_id,
-        organizationsUrl: data.organizations_url,
-        publicGists: data.public_gists,
-        publicRepos: data.public_repos,
-        receivedEventsUrl: data.received_events_url,
-        reposUrl: data.repos_url,
-        siteAdmin: data.site_admin,
-        starredUrl: data.starred_url,
-        subscriptionsUrl: data.subscriptions_url,
-        twitterUsername: data.twitter_username,
-        type: data.type,
-        updatedAt: data.updated_at,
-        url: data.url,
+    try {
+      const response = await fetch(GitHubUserProfileUrl, options)
+      if (response.ok) {
+        const data = await response.json()
+        const updatedData = {
+          avatarUrl: data.avatar_url,
+          bio: data.bio,
+          blog: data.blog,
+          company: data.company,
+          createdAt: data.created_at,
+          email: data.email,
+          eventsUrl: data.events_url,
+          followers: data.followers,
+          followersUrl: data.followers_url,
+          following: data.following,
+          followingUrl: data.following_url,
+          gistsUrl: data.gists_url,
+          gravatarId: data.gravatar_id,
+          hireable: data.hireable,
+          htmlUrl: data.html_url,
+          id: data.id,
+          location: data.location,
+          login: data.login,
+          name: data.name,
+          nodeId: data.node_id,
+          organizationsUrl: data.organizations_url,
+          publicGists: data.public_gists,
+          publicRepos: data.public_repos,
+          receivedEventsUrl: data.received_events_url,
+          reposUrl: data.repos_url,
+          siteAdmin: data.site_admin,
+          starredUrl: data.starred_url,
+          subscriptionsUrl: data.subscriptions_url,
+          twitterUsername: data.twitter_username,
+          type: data.type,
+          updatedAt: data.updated_at,
+          url: data.url,
+        }
+        this.setState({
+          profileDetails: [updatedData],
+          apiStatus: apiStatusConstants.success,
+        })
+      } else {
+        this.setState({
+          errorMsg: 'Failed to fetch data.',
+          apiStatus: apiStatusConstants.failure,
+        })
       }
-      this.setState(prevState => ({
-        profileDetails: [...prevState.profileDetails, updatedData],
-        apiStatus: apiStatusConstants.success,
-      }))
-    } else {
-      this.setState({apiStatus: apiStatusConstants.failure})
+    } catch (error) {
+      this.setState({
+        errorMsg: 'Something went wrong. Please try again later.',
+        apiStatus: apiStatusConstants.failure,
+      })
     }
   }
 
-  /* onChangeUserName = event => {
-    this.setState({username: event.target.value})
-  } */
-
-  onClickSearch = () => {
-    const {username} = this.props
-    if (username === '') {
+  onClickSearch = username => {
+    if (username.trim() === '') {
       this.setState({
-        isError: true,
-        errorMsg: 'Enter the valid github username',
+        errorMsg: 'Enter a valid GitHub username.',
         profileDetails: [],
+        apiStatus: apiStatusConstants.initial,
       })
     } else {
-      this.getGitHubUserProfileDetails()
-      this.setState({isError: false, errorMsg: ''})
+      this.getGitHubUserProfileDetails(username)
     }
+  }
+
+  onClickTryAgain = () => {
+    const {changeUserName} = this.context
+    this.setState({
+      apiStatus: apiStatusConstants.initial,
+      errorMsg: '',
+      profileDetails: [],
+    })
+    changeUserName('')
   }
 
   renderGithubDetailsOfProfile = () => {
     const {profileDetails} = this.state
     const object = profileDetails[0]
-
     const {
       avatarUrl,
       name,
@@ -185,19 +179,15 @@ class Home extends Component {
     )
   }
 
-  onClickTryAgain = () => {
-    this.getGitHubUserProfileDetails()
-  }
-
   renderFailureView = () => (
     <div className="failureContainer">
-      <h1 className="heading">Github Profile Visualizer</h1>
+      <h1 className="heading">GitHub Profile Visualizer</h1>
       <img
         src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718604995/Group_7522_f4ueqy.png"
         alt="failure view"
         className="error-view"
       />
-      <p className="errorName">Something went wrong. Please try again</p>
+      <p className="errorName">Something went wrong. Please try again.</p>
       <button
         className="tryButton"
         type="button"
@@ -214,104 +204,75 @@ class Home extends Component {
     </div>
   )
 
-  renderGithubProfilesDetails = () => {
-    const {apiStatus} = this.state
-    switch (apiStatus) {
-      case apiStatusConstants.success:
-        return this.renderGithubDetailsOfProfile()
-      case apiStatusConstants.failure:
-        return this.renderFailureView()
-      case apiStatusConstants.inProgress:
-        return this.renderLoaderView()
-      default:
-        return null
+  renderContent = () => {
+    const {errorMsg, apiStatus, profileDetails} = this.state
+    if (errorMsg) {
+      return (
+        <>
+          <p className="inputErrorMsg">{errorMsg}</p>
+          {this.renderFailureView()}
+        </>
+      )
     }
+
+    if (apiStatus === apiStatusConstants.inProgress) {
+      return this.renderLoaderView()
+    }
+
+    if (profileDetails.length === 0) {
+      return (
+        <div className="github-container">
+          <h1 className="heading">GitHub Profile Visualizer</h1>
+          <img
+            src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718599647/Group_21x-mobileview_iyuarb.png"
+            alt="GitHub profile visualizer home page"
+            className="homeImage"
+          />
+        </div>
+      )
+    }
+
+    return this.renderGithubDetailsOfProfile()
   }
 
-  /*  onChangeUserName = event => {
-    const {changeUserName} = this.props
-    changeUserName(event.target.value)
-  } */
-
   render() {
+    const {username, changeUserName} = this.context
+
+    const onChangeUserName = event => {
+      changeUserName(event.target.value)
+    }
+
     return (
-      <UsernameContext.Consumer>
-        {value => {
-          const {profileDetails, isError, errorMsg} = this.state
-          const isListEmpty = profileDetails.length === 0
-          const {username, changeUserName} = value
-
-          const onChangeUserName = event => {
-            changeUserName(event.target.value)
-          }
-
-          return (
-            <>
-              <Header />
-              <div className="home-container">
-                <div className="input-container">
-                  <input
-                    type="search"
-                    value={username}
-                    onChange={onChangeUserName}
-                    placeholder="Enter github username"
-                    className="input-search-style"
-                  />
-                  <div className="search-icon-container">
-                    <button
-                      type="button"
-                      onClick={this.onClickSearch}
-                      className="search-button"
-                      data-testid="searchButton"
-                    >
-                      .<HiOutlineSearch className="search-icon" />
-                    </button>
-                  </div>
-                </div>
-                {isError ? (
-                  <>
-                    <p className="inputErrorMsg">{errorMsg}</p>
-                    <div className="failureInputContainer">
-                      <h1 className="heading">Github Profile Visualizer</h1>
-                      <img
-                        src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718604995/Group_7522_f4ueqy.png"
-                        alt="failure view"
-                        className="error-view"
-                      />
-                      <p className="errorName">
-                        Something went wrong. Please try again
-                      </p>
-                      <button
-                        className="tryButton"
-                        type="button"
-                        onClick={this.onClickTryAgain}
-                      >
-                        Try again
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div>
-                    {isListEmpty ? (
-                      <div>
-                        <h1 className="heading">Github Profile Visualizer</h1>
-                        <img
-                          src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718599647/Group_21x-mobileview_iyuarb.png"
-                          alt="gitHub profile visualizer home page"
-                          className="homeImage"
-                        />
-                      </div>
-                    ) : (
-                      this.renderGithubProfilesDetails()
-                    )}
-                  </div>
-                )}
-              </div>
-            </>
-          )
-        }}
-      </UsernameContext.Consumer>
+      <>
+        <Header />
+        <div className="home-container">
+          <div className="input-container">
+            <input
+              type="search"
+              value={username}
+              onChange={onChangeUserName}
+              placeholder="Enter GitHub username"
+              className="input-search-style"
+            />
+            <div className="search-icon-container">
+              <button
+                type="button"
+                onClick={() => this.onClickSearch(username)}
+                className="search-button"
+                data-testid="searchButton"
+                aria-label="Search GitHub username"
+              >
+                <HiOutlineSearch className="search-icon" />
+              </button>
+            </div>
+          </div>
+          {this.renderContent()}
+        </div>
+      </>
     )
   }
 }
+
+Home.contextType = UsernameContext
+
 export default Home

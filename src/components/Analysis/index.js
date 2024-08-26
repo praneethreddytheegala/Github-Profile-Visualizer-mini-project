@@ -14,7 +14,7 @@ import LanguageCommitCountPie from '../LangCommitCountPie'
 
 import RepoCommitCountPie from '../RepoCommitCountPie'
 
-// import RepoCommitCountDescription from '../RepoCommitCountDescription'
+import RepoCommitCountDescription from '../RepoCommitCountDescription'
 
 import './index.css'
 
@@ -42,7 +42,7 @@ class Analysis extends Component {
 
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
-    const url = `https://apis2.ccbp.in/gpv/profile-summary/${username}?api_key=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`
+    const url = `https://apis2.ccbp.in/gpv/profile-summary/${username}?api_key=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`
     const options = {
       method: 'GET',
     }
@@ -71,11 +71,11 @@ class Analysis extends Component {
       langRepoCount,
       langCommitCount,
       repoCommitCount,
-      /* repoCommitCountDescriptions, */
+      repoCommitCountDescriptions,
     } = analysisList
     const {avatarUrl, login} = user
 
-    //   const repoCommitDescriptionKeys = Object.keys(repoCommitCountDescriptions)
+    const repoCommitDescriptionKeys = Object.keys(repoCommitCountDescriptions)
 
     /* 1. Data for quarterCommitCount that is for LinearChart */
     const quarterCommitData = []
@@ -159,7 +159,7 @@ class Analysis extends Component {
                 <h1 className="repoCommitHeading">Commits Per Repo (Top 10)</h1>
                 <RepoCommitCountPie repoCommitCount={slicedData} />
               </div>
-              {/* <ul className="list">
+              <ul className="list">
                 {repoCommitDescriptionKeys.map(eachItem => (
                   <RepoCommitCountDescription
                     repoCommitCountDescriptions={repoCommitCountDescriptions}
@@ -167,7 +167,7 @@ class Analysis extends Component {
                     key={eachItem}
                   />
                 ))}
-              </ul> */}
+              </ul>
             </div>
           </>
         )}

@@ -1,24 +1,17 @@
 import {Component} from 'react'
-
 import {Link} from 'react-router-dom'
-
 import './index.css'
 
 class Header extends Component {
   state = {activeStatus: false}
 
   onClickMenuButton = () => {
-    const {activeStatus} = this.state
-    this.setState({activeStatus: !activeStatus})
+    this.setState(prevState => ({activeStatus: !prevState.activeStatus}))
   }
-
-  /* onClickLink = () => {
-    this.setState({color: true})
-  } */
 
   render() {
     const {activeStatus} = this.state
-    /* const cssStylingLink = color ? 'act-style-link' : '' */
+    const currentPath = window.location.pathname
 
     return (
       <div className="container">
@@ -32,6 +25,7 @@ class Header extends Component {
               className="menu-button"
               type="button"
               onClick={this.onClickMenuButton}
+              aria-label="Toggle navigation menu"
             >
               <img
                 src="https://res.cloudinary.com/ddsn9feta/image/upload/v1718691523/menu_l33xs7.png"
@@ -39,30 +33,86 @@ class Header extends Component {
                 className="menuSize"
               />
             </button>
-            <ul className="items-nav">
-              <Link to="/" className="item-nav-link">
-                <li>Home</li>
-              </Link>
-              <Link to="/repositories" className="item-nav-link">
-                <li>Repositories</li>
-              </Link>
-              <Link to="/analysis" className="item-nav-link">
-                <li>Analysis</li>
-              </Link>
+
+            <ul className={`items-nav ${activeStatus ? 'active' : ''}`}>
+              <li>
+                <Link
+                  to="/"
+                  className={
+                    currentPath === '/'
+                      ? 'active-link item-nav-link'
+                      : 'item-nav-link'
+                  }
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/repositories"
+                  className={
+                    currentPath === '/repositories'
+                      ? 'active-link item-nav-link'
+                      : 'item-nav-link'
+                  }
+                >
+                  Repositories
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/analysis"
+                  className={
+                    currentPath === '/analysis'
+                      ? 'active-link item-nav-link'
+                      : 'item-nav-link'
+                  }
+                >
+                  Analysis
+                </Link>
+              </li>
             </ul>
           </nav>
+
           {activeStatus && (
             <nav>
-              <ul className="nav-items-container">
-                <Link to="/" className="item-link">
-                  <li>Home</li>
-                </Link>
-                <Link to="/repositories" className="item-link">
-                  <li>Repositories</li>
-                </Link>
-                <Link to="/analysis" className="item-link">
-                  <li>Analysis</li>
-                </Link>
+              <ul className="nav-items-container active">
+                <li>
+                  <Link
+                    to="/"
+                    className={
+                      currentPath === '/'
+                        ? 'active-link item-link'
+                        : 'item-link'
+                    }
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/repositories"
+                    className={
+                      currentPath === '/repositories'
+                        ? 'active-link item-link'
+                        : 'item-link'
+                    }
+                  >
+                    Repositories
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/analysis"
+                    className={
+                      currentPath === '/analysis'
+                        ? 'active-link item-link'
+                        : 'item-link'
+                    }
+                  >
+                    Analysis
+                  </Link>
+                </li>
               </ul>
             </nav>
           )}
@@ -71,4 +121,5 @@ class Header extends Component {
     )
   }
 }
+
 export default Header
