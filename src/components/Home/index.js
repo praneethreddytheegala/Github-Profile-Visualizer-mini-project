@@ -25,7 +25,7 @@ class Home extends Component {
   getGitHubUserProfileDetails = async username => {
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
-    const GitHubUserProfileUrl = `https://apis2.ccbp.in/gpv/profile-details/${username}?api_key=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`
+    const GitHubUserProfileUrl = `https://apis2.ccbp.in/gpv/profile-details/${username}?api_key=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`
     const options = {method: 'GET'}
 
     try {

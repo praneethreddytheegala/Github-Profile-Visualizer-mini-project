@@ -42,7 +42,7 @@ class Analysis extends Component {
 
     this.setState({apiStatus: apiStatusConstants.inProgress})
 
-    const url = `https://apis2.ccbp.in/gpv/profile-summary/${username}?api_key=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`
+    const url = `https://apis2.ccbp.in/gpv/profile-summary/${username}?api_key=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`
     const options = {
       method: 'GET',
     }

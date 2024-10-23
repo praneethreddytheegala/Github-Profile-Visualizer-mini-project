@@ -4,14 +4,8 @@ import './index.css'
 
 const RepositoryCard = props => {
   const {repositoryDetails} = props
-  const {
-    name,
-    description,
-    languages,
-    stargazersCount,
-    forksCount,
-    owner,
-  } = repositoryDetails
+  const {name, description, languages, stargazersCount, forksCount, owner} =
+    repositoryDetails
   const {avatarUrl, login} = owner
 
   return (
